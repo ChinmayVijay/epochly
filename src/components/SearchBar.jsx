@@ -1,30 +1,42 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './SearchBar.module.css'
-import { searchTopics } from '../data.js'
+import { useSuggestions } from '../hooks/useSuggestions.js'
 
 export default function SearchBar({ onSearch }) {
   const [value, setValue] = useState('')
-  const [suggestions, setSuggestions] = useState([])
   const [open, setOpen] = useState(false)
   const [highlighted, setHighlighted] = useState(-1)
   const wrapRef = useRef(null)
   const inputRef = useRef(null)
 
+  const { 
+    staticSuggestions, 
+    aiSuggestions, 
+    aiLoading 
+  } = useSuggestions(value)
+
+  const allSuggestions = [
+    ...staticSuggestions.map(s => ({
+      label: s.label,
+      count: `${s.eventCount} events`,
+      type: 'static'
+    })),
+    ...aiSuggestions.map(s => ({
+      label: s,
+      count: 'AI generated',
+      type: 'ai'
+    }))
+  ]
+
   useEffect(() => {
-    if (value.trim().length >= 2) {
-      const results = searchTopics(value)
-      setSuggestions(results)
-      setOpen(results.length > 0)
-      setHighlighted(-1)
-    } else {
-      setSuggestions([])
-      setOpen(false)
-    }
-  }, [value])
+    const trimmed = value.trim()
+    setOpen(trimmed.length >= 1)
+    setHighlighted(-1)
+  }, [value, staticSuggestions, aiSuggestions])
 
   useEffect(() => {
     function handleClickOutside(e) {
-      if (wrapRef.current && 
+      if (wrapRef.current &&
         !wrapRef.current.contains(e.target)) {
         setOpen(false)
       }
@@ -39,24 +51,29 @@ export default function SearchBar({ onSearch }) {
 
   function handleSubmit(e) {
     e.preventDefault()
-    if (highlighted >= 0 && suggestions[highlighted]) {
-      selectSuggestion(suggestions[highlighted].label)
+    if (
+      highlighted >= 0 &&
+      allSuggestions[highlighted]
+    ) {
+      selectSuggestion(
+        allSuggestions[highlighted].label
+      )
     } else if (value.trim()) {
       submit(value.trim())
     }
   }
 
   function selectSuggestion(label) {
-    setValue(label)
+    setValue('')
     setOpen(false)
     setHighlighted(-1)
-    submit(label)
+    onSearch(label)
   }
 
   function submit(topic) {
-    onSearch(topic)
     setValue('')
     setOpen(false)
+    onSearch(topic)
   }
 
   function handleKeyDown(e) {
@@ -64,12 +81,12 @@ export default function SearchBar({ onSearch }) {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       setHighlighted(h =>
-        h < suggestions.length - 1 ? h + 1 : 0
+        h < allSuggestions.length - 1 ? h + 1 : 0
       )
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setHighlighted(h =>
-        h > 0 ? h - 1 : suggestions.length - 1
+        h > 0 ? h - 1 : allSuggestions.length - 1
       )
     } else if (e.key === 'Escape') {
       setOpen(false)
@@ -78,8 +95,9 @@ export default function SearchBar({ onSearch }) {
   }
 
   function highlight(text, query) {
+    if (!query || !query.trim()) return text
     const idx = text.toLowerCase()
-      .indexOf(query.toLowerCase())
+      .indexOf(query.toLowerCase().trim())
     if (idx === -1) return text
     return (
       <>
@@ -88,14 +106,17 @@ export default function SearchBar({ onSearch }) {
           background: 'var(--accent-dim)',
           color: 'var(--accent)',
           borderRadius: '2px',
-          padding: '0 1px'
+          padding: '0 1px',
+          fontWeight: 500
         }}>
-          {text.slice(idx, idx + query.length)}
+          {text.slice(idx, idx + query.trim().length)}
         </mark>
-        {text.slice(idx + query.length)}
+        {text.slice(idx + query.trim().length)}
       </>
     )
   }
+
+  const showDropdown = open && value.trim().length >= 1
 
   return (
     <div className={styles.wrap} ref={wrapRef}>
@@ -111,12 +132,14 @@ export default function SearchBar({ onSearch }) {
           onChange={e => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => {
-            if (suggestions.length > 0) setOpen(true)
+            if (value.trim().length >= 1) setOpen(true)
           }}
-          placeholder="e.g. Space Race, Bitcoin, 
-            Nelson Mandela…"
+          placeholder="Search any topic in history…"
           autoComplete="off"
           autoFocus
+          aria-label="Search any historical topic"
+          aria-autocomplete="list"
+          aria-expanded={showDropdown}
         />
         <button
           className={styles.btn}
@@ -127,46 +150,91 @@ export default function SearchBar({ onSearch }) {
         </button>
       </form>
 
-      {open && suggestions.length > 0 && (
-        <div className={styles.dropdown}>
+      {showDropdown && (
+        <div
+          className={styles.dropdown}
+          role="listbox"
+        >
           <div className={styles.dropdownInner}>
-            {suggestions.map((s, i) => (
-              <div
-                key={s.key}
-                className={
-                  `${styles.suggestion} ` +
-                  (i === highlighted
-                    ? styles.suggestionActive
-                    : '')
-                }
-                onMouseDown={() =>
-                  selectSuggestion(s.label)
-                }
-                onMouseEnter={() => setHighlighted(i)}
-              >
-                <div className={styles.suggestionLeft}>
-                  <i
-                    className="ti ti-timeline"
-                    style={{ fontSize: '13px' }}
-                    aria-hidden="true"
-                  />
-                  <span className={styles.suggestionLabel}>
-                    {highlight(s.label, value)}
+
+            {allSuggestions.length > 0 && (
+              allSuggestions.map((s, i) => (
+                <div
+                  key={`${s.label}-${i}`}
+                  role="option"
+                  aria-selected={i === highlighted}
+                  className={[
+                    styles.suggestion,
+                    i === highlighted
+                      ? styles.suggestionActive
+                      : ''
+                  ].join(' ')}
+                  onMouseDown={() =>
+                    selectSuggestion(s.label)
+                  }
+                  onMouseEnter={() =>
+                    setHighlighted(i)
+                  }
+                >
+                  <div className={styles.suggestionLeft}>
+                    <i
+                      className={
+                        s.type === 'ai'
+                          ? 'ti ti-sparkles'
+                          : 'ti ti-timeline'
+                      }
+                      style={{
+                        fontSize: '13px',
+                        color: s.type === 'ai'
+                          ? 'var(--accent)'
+                          : 'var(--text-muted)'
+                      }}
+                      aria-hidden="true"
+                    />
+                    <span
+                      className={styles.suggestionLabel}
+                    >
+                      {highlight(s.label, value)}
+                    </span>
+                  </div>
+                  <span
+                    className={[
+                      styles.suggestionCount,
+                      s.type === 'ai'
+                        ? styles.aiTag
+                        : ''
+                    ].join(' ')}
+                  >
+                    {s.count}
                   </span>
                 </div>
-                <span className={styles.suggestionCount}>
-                  {s.eventCount} events
-                </span>
+              ))
+            )}
+
+            {aiLoading && (
+              <div className={styles.aiLoadingRow}>
+                <div className={styles.aiDots}>
+                  <span /><span /><span />
+                </div>
+                Finding more topics…
               </div>
-            ))}
+            )}
+
             <div className={styles.dropdownFooter}>
               <i
-                className="ti ti-sparkles"
+                className="ti ti-arrow-back"
                 style={{ fontSize: '11px' }}
                 aria-hidden="true"
               />
-              Press Enter to search any topic with AI
+              Press Enter to explore
+              <strong style={{ color: 'var(--text)' }}>
+                {value.trim()
+                  ? ` "${value.trim()}"` 
+                  : ' any topic'}
+              </strong>
+              with AI
             </div>
+
           </div>
         </div>
       )}
