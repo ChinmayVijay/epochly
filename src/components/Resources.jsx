@@ -36,32 +36,42 @@ async function fetchBooks(topic) {
         'Authorization': `Bearer ${GROQ_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama-3.1-8b-instant',
         temperature: 0.3,
         max_tokens: 800,
         messages: [
           {
             role: 'system',
             content: `You are a book recommendation 
-expert. Return ONLY a valid JSON array. No markdown, 
-no explanation, no code fences.`
+expert. Return ONLY a valid JSON array. 
+No markdown, no explanation, no code fences.
+You must include the correct ISBN-10 for each book.
+ISBN-10 is exactly 10 characters — digits only 
+or ending in X. Double check each ISBN is correct.`
           },
           {
             role: 'user',
-            content: `Recommend 5 of the best books 
-about "${topic}". Include well-known authoritative 
-books — biographies, histories, or analyses.
+            content: `Recommend 5 of the best and 
+most well known books about "${topic}".
+Only recommend books that definitely exist and 
+are available on Amazon India.
 
-Return ONLY this JSON array:
+Return ONLY this JSON array, nothing else:
 [
   {
     "title": "Exact book title",
     "author": "Author full name",
-    "description": "One sentence about the book max 15 words"
+    "description": "One sentence max 12 words",
+    "isbn10": "0000000000"
   }
 ]
 
-5 books only. JSON array only.`
+Rules:
+- isbn10 must be exactly 10 characters
+- isbn10 must be the real ISBN-10 for that book
+- Only include books you are certain exist
+- 5 books only
+- JSON array only, nothing else`
           }
         ]
       })
@@ -69,15 +79,39 @@ Return ONLY this JSON array:
   )
   if (!res.ok) throw new Error('Groq error')
   const data = await res.json()
-  const raw = data.choices?.[0]?.message?.content || '[]'
-  const cleaned = raw.replace(/\`\`\`json|\`\`\`/g, '').trim()
-  const books = JSON.parse(cleaned)
-  return books.map(b => ({
-    ...b,
-    amazonUrl: `https://www.amazon.in/s?k=${
-      encodeURIComponent(b.title + ' ' + b.author)
-    }&tag=${AMZ_TAG}`
-  }))
+  const raw = data.choices?.[0]
+    ?.message?.content || '[]'
+  const cleaned = raw
+    .replace(/\`\`\`json|\`\`\`/g, '').trim()
+
+  let books = []
+  try {
+    books = JSON.parse(cleaned)
+    if (!Array.isArray(books)) books = []
+  } catch {
+    throw new Error('Could not load books')
+  }
+
+  return books.map(b => {
+    const isbn = b.isbn10?.toString().trim() || ''
+    const hasValidISBN = isbn.length === 10 &&
+      /^[0-9]{9}[0-9X]$/.test(isbn)
+
+    const amazonUrl = hasValidISBN
+      ? `https://www.amazon.in/dp/${isbn}` +
+        `?tag=${AMZ_TAG}`
+      : `https://www.amazon.in/s?k=` +
+        `${encodeURIComponent(b.title + ' ' + b.author)}` +
+        `&tag=${AMZ_TAG}`
+
+    return {
+      title: b.title || '',
+      author: b.author || '',
+      description: b.description || '',
+      isbn10: isbn,
+      amazonUrl
+    }
+  })
 }
 
 const COVER_COLORS = [
@@ -228,6 +262,7 @@ export default function Resources({ topic }) {
                   href={b.amazonUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  title={`Buy "${b.title}" by ${b.author} on Amazon`}
                   className={styles.bookCard}
                 >
                   <div
@@ -256,7 +291,10 @@ export default function Resources({ topic }) {
                       {b.author}
                     </span>
                     <span className={styles.bookCta}>
-                      Buy on Amazon →
+                      {b.isbn10 && b.isbn10.length === 10
+                        ? 'View on Amazon →'
+                        : 'Search on Amazon →'
+                      }
                     </span>
                   </div>
                 </a>
