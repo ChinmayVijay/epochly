@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 630px; overflow: hidden;
+    background: #0f0f14;
+    font-family: Georgia, serif;
+    display: flex; flex-direction: column;
+    justify-content: center; padding: 80px;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(
+      90deg, #c9a96e, #e8c990, #c9a96e);
+  }
+  .brand {
+    font-family: sans-serif; font-size: 18px;
+    color: #c9a96e; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .circle {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #c9a96e;
+    display: flex; align-items: center; 
+    justify-content: center;
+    flex-direction: column; gap: 4px; padding: 8px;
+  }
+  .line { 
+    height: 2px; background: #0f0f14; 
+    border-radius: 1px; 
+  }
+  h1 {
+    font-size: 72px; font-weight: 400;
+    color: #f0ede8; letter-spacing: -0.03em;
+    line-height: 1.1; margin-bottom: 24px;
+  }
+  h1 span { color: #c9a96e; font-family: sans-serif;
+    font-size: 36px; vertical-align: super; }
+  p {
+    font-size: 26px; color: rgba(240,237,232,0.45);
+    font-family: sans-serif; line-height: 1.5;
+    max-width: 700px;
+  }
+  .pills {
+    position: absolute; bottom: 60px; left: 80px;
+    display: flex; gap: 12px;
+  }
+  .pill {
+    font-family: sans-serif; font-size: 14px;
+    color: rgba(240,237,232,0.35);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 16px; border-radius: 20px;
+  }
+</style>
+</head>
+<body>
+  <div class="brand">
+    <div class="circle">
+      <div class="line" style="width:18px"></div>
+      <div class="line" style="width:11px"></div>
+      <div class="line" style="width:14px"></div>
+      <div class="line" style="width:11px"></div>
+    </div>
+    Epochly.ai
+  </div>
+  <h1>Explore Any Topic<br>Through Time<span>.ai</span></h1>
+  <p>Type any topic. See its entire story unfold.</p>
+  <div class="pills">
+    <div class="pill">Space Race</div>
+    <div class="pill">Bitcoin</div>
+    <div class="pill">Cold War</div>
+    <div class="pill">iPhone</div>
+    <div class="pill">Nelson Mandela</div>
+  </div>
+</body>
+</html>

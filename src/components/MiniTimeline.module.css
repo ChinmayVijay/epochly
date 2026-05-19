@@ -1,0 +1,145 @@
+.wrap {
+  margin-top: 14px;
+  padding-bottom: 4px;
+  border-top: 0.5px solid var(--border);
+}
+
+.label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.label::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+}
+
+.scroll {
+  overflow-x: auto;
+  cursor: grab;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hover) transparent;
+}
+
+.scroll::-webkit-scrollbar {
+  height: 3px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 2px;
+}
+
+.inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  min-width: max-content;
+  position: relative;
+  padding: 0 4px;
+}
+
+.inner::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 5px;
+  height: 1.5px;
+  background: var(--border);
+}
+
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 130px;
+  max-width: 130px;
+  padding: 0 8px;
+  position: relative;
+}
+
+.node:first-child { padding-left: 0; }
+.node:last-child  { padding-right: 16px; }
+
+.dotRow {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--bg);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.node:hover .dot {
+  background: var(--accent);
+}
+
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.node:hover .card {
+  border-color: var(--border-hover);
+}
+
+.date {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 3px;
+}
+
+.desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.scrollHint {
+  font-size: 10px;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding-left: 2px;
+}

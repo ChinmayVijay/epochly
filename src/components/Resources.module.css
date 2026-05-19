@@ -1,0 +1,257 @@
+.wrap {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {}
+
+.secHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.secTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.secLine {
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+}
+
+.secCount {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ytList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ytCard {
+  display: flex;
+  gap: 0;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-decoration: none;
+  background: var(--surface);
+  transition: border-color 0.15s;
+}
+
+.ytCard:hover { border-color: var(--border-hover); }
+
+.ytThumb {
+  width: 128px;
+  flex-shrink: 0;
+  background: #1a1a2e;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 78px;
+  overflow: hidden;
+}
+
+.ytImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ytPlay {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: rgba(220,0,0,0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ytInfo {
+  flex: 1;
+  padding: 11px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ytChannel {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ytTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ytCta {
+  font-size: 11px;
+  color: var(--accent);
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.booksGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 500px) {
+  .booksGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.bookCard {
+  display: flex;
+  flex-direction: column;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  text-decoration: none;
+  background: var(--surface);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.bookCard:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.bookCover {
+  aspect-ratio: 2/3;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.bestBadge {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-size: 8px;
+  font-weight: 500;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #c9a96e;
+  color: #0f0f14;
+}
+
+.coverText {
+  text-align: center;
+}
+
+.coverTitle {
+  font-size: 9px;
+  font-weight: 500;
+  color: #f0ede8;
+  line-height: 1.3;
+}
+
+.coverAuthor {
+  font-size: 8px;
+  color: rgba(240,237,232,0.5);
+  margin-top: 4px;
+}
+
+.bookInfo {
+  padding: 7px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bookTitle {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bookAuthor {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.bookCta {
+  font-size: 9px;
+  color: var(--accent);
+  margin-top: 3px;
+}
+
+.affNote {
+  font-size: 10px;
+  color: var(--text-faint);
+  text-align: center;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeletonYt {
+  height: 78px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonBook {
+  aspect-ratio: 2/3;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.errMsg {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 0.5rem 0;
+}

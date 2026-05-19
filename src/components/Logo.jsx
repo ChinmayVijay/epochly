@@ -1,0 +1,17 @@
+export default function Logo({ size = 38 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 38 38"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <circle cx="19" cy="19" r="19" className="mark-circle" />
+      <rect x="11" y="11"   width="16" height="2.5" rx="1.25" className="mark-line" />
+      <rect x="11" y="16.5" width="10" height="2.5" rx="1.25" className="mark-line" />
+      <rect x="11" y="22"   width="13" height="2.5" rx="1.25" className="mark-line" />
+      <rect x="11" y="27.5" width="10" height="2.5" rx="1.25" className="mark-line" />
+    </svg>
+  )
+}
