@@ -27,7 +27,7 @@ async function fetchYouTubeVideos(topic) {
   }))
 }
 
-async function fetchBooks(topic) {
+async function fetchBookTitles(topic) {
   const res = await fetch(
     'https://api.groq.com/openai/v1/chat/completions',
     {
@@ -39,40 +39,29 @@ async function fetchBooks(topic) {
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
         temperature: 0.3,
-        max_tokens: 800,
+        max_tokens: 400,
         messages: [
           {
             role: 'system',
-            content: `You are a book recommendation 
-expert. Return ONLY a valid JSON array. 
-No markdown, no explanation, no code fences.
-You must include the correct ISBN-10 for each book.
-ISBN-10 is exactly 10 characters — digits only 
-or ending in X. Double check each ISBN is correct.`
+            content: `You are a book recommendation expert.
+Return ONLY a valid JSON array. No markdown, no 
+explanation, no code fences.`
           },
           {
             role: 'user',
-            content: `Recommend 5 of the best and 
-most well known books about "${topic}".
-Only recommend books that definitely exist and 
-are available on Amazon India.
+            content: `Recommend 6 well-known books 
+about "${topic}". Only include famous, widely 
+available books that definitely exist.
 
-Return ONLY this JSON array, nothing else:
+Return ONLY this JSON array:
 [
   {
     "title": "Exact book title",
-    "author": "Author full name",
-    "description": "One sentence max 12 words",
-    "isbn10": "0000000000"
+    "author": "Author full name"
   }
 ]
 
-Rules:
-- isbn10 must be exactly 10 characters
-- isbn10 must be the real ISBN-10 for that book
-- Only include books you are certain exist
-- 5 books only
-- JSON array only, nothing else`
+6 books only. JSON array only. Nothing else.`
           }
         ]
       })
@@ -83,36 +72,88 @@ Rules:
   const raw = data.choices?.[0]
     ?.message?.content || '[]'
   const cleaned = raw
-    .replace(/\`\`\`json|\`\`\`/g, '').trim()
-
-  let books = []
+    .replace(/```json|```/g, '').trim()
   try {
-    books = JSON.parse(cleaned)
-    if (!Array.isArray(books)) books = []
+    const parsed = JSON.parse(cleaned)
+    return Array.isArray(parsed) ? parsed : []
   } catch {
-    throw new Error('Could not load books')
+    return []
   }
+}
 
-  return books.map(b => {
-    const isbn = b.isbn10?.toString().trim() || ''
-    const hasValidISBN = isbn.length === 10 &&
-      /^[0-9]{9}[0-9X]$/.test(isbn)
+async function lookupBook(title, author) {
+  try {
+    const query = encodeURIComponent(
+      `${title} ${author}`
+    )
+    const res = await fetch(
+      `https://openlibrary.org/search.json` +
+      `?q=${query}&fields=title,author_name,isbn&limit=1`
+    )
+    if (!res.ok) return null
+    const data = await res.json()
+    const book = data.docs?.[0]
+    if (!book) return null
 
-    const amazonUrl = hasValidISBN
-      ? `https://www.amazon.in/dp/${isbn}` +
-        `?tag=${AMZ_TAG}`
-      : `https://www.amazon.in/s?k=` +
-        `${encodeURIComponent(b.title + ' ' + b.author)}` +
-        `&tag=${AMZ_TAG}`
+    const isbns = book.isbn || []
+    const isbn10 = isbns.find(
+      i => i.length === 10 &&
+      /^[0-9]{9}[0-9X]$/.test(i)
+    )
 
     return {
-      title: b.title || '',
-      author: b.author || '',
-      description: b.description || '',
-      isbn10: isbn,
-      amazonUrl
+      title: book.title || title,
+      author: book.author_name?.[0] || author,
+      asin: isbn10 || null,
+      verified: !!isbn10
+    }
+  } catch {
+    return null
+  }
+}
+
+async function fetchBooks(topic) {
+  const suggestions = await fetchBookTitles(topic)
+  if (!suggestions.length) return []
+
+  const results = await Promise.allSettled(
+    suggestions.map(b => lookupBook(b.title, b.author))
+  )
+
+  const books = []
+
+  results.forEach((result, i) => {
+    const original = suggestions[i]
+    const looked = result.status === 'fulfilled'
+      ? result.value
+      : null
+
+    if (looked && looked.asin) {
+      books.push({
+        title: looked.title,
+        author: looked.author,
+        asin: looked.asin,
+        amazonUrl: `https://www.amazon.in/dp/` +
+          `${looked.asin}?tag=${AMZ_TAG}`,
+        verified: true
+      })
+    } else {
+      books.push({
+        title: original.title,
+        author: original.author,
+        asin: null,
+        amazonUrl: `https://www.amazon.in/s?k=` +
+          encodeURIComponent(
+            original.title + ' ' + original.author
+          ) + `&tag=${AMZ_TAG}`,
+        verified: false
+      })
     }
   })
+
+  return books
+    .sort((a, b) => b.verified - a.verified)
+    .slice(0, 5)
 }
 
 const COVER_COLORS = [
@@ -263,41 +304,51 @@ export default function Resources({ topic }) {
                   href={b.amazonUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title={`Buy "${b.title}" by ${b.author} on Amazon`}
+                  title={
+                    b.verified
+                      ? `Buy "${b.title}" on Amazon`
+                      : `Search "${b.title}" on Amazon`
+                  }
                   className={styles.bookCard}
                 >
                   <div
-                    className={styles.bookCover}
-                    style={{ background: COVER_COLORS[i] }}
-                  >
-                    {i === 0 && (
-                      <span className={styles.bestBadge}>
-                        Best
-                      </span>
-                    )}
-                    <div className={styles.coverText}>
-                      <div className={styles.coverTitle}>
-                        {b.title}
-                      </div>
-                      <div className={styles.coverAuthor}>
-                        {b.author}
-                      </div>
+                  className={styles.bookCover}
+                  style={{ background: COVER_COLORS[i] }}
+                >
+                  {i === 0 && (
+                    <span className={styles.bestBadge}>
+                      Best
+                    </span>
+                  )}
+                  {b.verified && (
+                    <span className={styles.verifiedBadge}>
+                      ✓
+                    </span>
+                  )}
+                  <div className={styles.coverText}>
+                    <div className={styles.coverTitle}>
+                      {b.title}
+                    </div>
+                    <div className={styles.coverAuthor}>
+                      {b.author}
                     </div>
                   </div>
-                  <div className={styles.bookInfo}>
-                    <span className={styles.bookTitle}>
-                      {b.title}
-                    </span>
-                    <span className={styles.bookAuthor}>
-                      {b.author}
-                    </span>
-                    <span className={styles.bookCta}>
-                      {b.isbn10 && b.isbn10.length === 10
-                        ? 'View on Amazon →'
-                        : 'Search on Amazon →'
-                      }
-                    </span>
-                  </div>
+                </div>
+                <div className={styles.bookInfo}>
+                  <span className={styles.bookTitle}>
+                    {b.title}
+                  </span>
+                  <span className={styles.bookAuthor}>
+                    {b.author}
+                  </span>
+                  <span className={styles.bookCta}>
+                    {b.verified
+                      ? 'Buy on Amazon →'
+                      : 'Search on Amazon →'
+                    }
+                  </span>
+                </div>
+
                 </a>
               ))}
             </div>
