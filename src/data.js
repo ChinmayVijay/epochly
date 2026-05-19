@@ -369,3 +369,22 @@ export function findTimeline(query) {
   if (partialMatch) return TOPICS[partialMatch];
   return null;
 }
+
+export function searchTopics(query) {
+  if (!query || query.trim().length < 2) return []
+  const q = query.toLowerCase().trim()
+  return Object.values(TOPICS)
+    .filter(t =>
+      t.topic.toLowerCase().includes(q) ||
+      q.split(' ').some(word =>
+        t.topic.toLowerCase().includes(word)
+      )
+    )
+    .slice(0, 6)
+    .map(t => ({
+      key: t.topic.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-'),
+      label: t.topic,
+      eventCount: t.events.length
+    }))
+}
