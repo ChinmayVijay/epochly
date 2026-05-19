@@ -3,7 +3,8 @@ import styles from './Resources.module.css'
 
 const YT_KEY = import.meta.env.VITE_YOUTUBE_API_KEY
 const GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY
-const AMZ_TAG = import.meta.env.VITE_AMAZON_AFFILIATE_TAG
+const AMZ_TAG = import.meta.env.VITE_AMAZON_AFFILIATE_TAG 
+  || 'epochlyai-21'
 
 async function fetchYouTubeVideos(topic) {
   const query = encodeURIComponent(
