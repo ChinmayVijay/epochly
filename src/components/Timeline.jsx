@@ -123,19 +123,25 @@ export default function Timeline({ data, onReset }) {
           <div className={styles.relatedGrid}>
             {relatedKeys.map((relatedKey, index) => {
               const relatedTopic = TOPICS[relatedKey]
-              return relatedTopic ? (
+              const displayName = relatedTopic
+                ? relatedTopic.topic
+                : relatedKey
+              const slug = displayName
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '')
+              return (
                 <div
                   key={index}
                   className={styles.relatedCard}
-                  onClick={() => {
-                    const slug = relatedTopic.topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').trim()
-                    navigate('/timeline/' + slug)
-                  }}
+                  onClick={() => navigate('/timeline/' + slug)}
                 >
-                  <h4>{relatedTopic.topic}</h4>
-                  <p>{relatedTopic.intro.substring(0, 100)}...</p>
+                  <h4>{displayName}</h4>
+                  {relatedTopic && (
+                    <p>{relatedTopic.intro.substring(0, 100)}...</p>
+                  )}
                 </div>
-              ) : null
+              )
             })}
           </div>
         </div>

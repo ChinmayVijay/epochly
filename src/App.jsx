@@ -38,157 +38,14 @@ async function fetchTimeline(topic) {
         model: 'llama-3.1-8b-instant',
         temperature: 0.7,
         max_tokens: 2500,
-        messages: 
-        [
+        messages: [
           {
             role: 'system',
-            content: `You are a historical research 
-assistant. You always respond with ONLY a valid 
-JSON object. No markdown, no code fences, no 
-explanation before or after the JSON. Never add 
-any text outside the JSON object.`
+            content: 'You are a world-class historical narrative writer. Your timelines are read by curious intelligent adults who want to understand how the world got to where it is today. You write with clarity, authority, and just enough drama to make history feel alive. Always respond with ONLY a valid JSON object. No markdown, no code fences, no preamble, no explanation. Ever.'
           },
           {
             role: 'user',
-            content: `Generate a timeline for: ${topic}
-
-Before writing, think about:
-- What is the single most important thread that 
-  runs through this topic's entire history?
-- Which 10 events best reveal that thread to 
-  someone who knows nothing about this topic?
-- What surprising or counterintuitive fact would 
-  make a reader stop and think?
-
-FIELD QUALITY GUIDE — read before writing:
-
-topic: Clean display name for the topic.
-
-intro: 2-3 sentences. Job 1 — hook the reader 
-with what makes this topic uniquely important or 
-surprising. Job 2 — give essential context a 
-newcomer needs. Job 3 — set up the tension the 
-timeline will answer. Write like the opening 
-paragraph of a long-form magazine article.
-
-events.title: Active verb headline max 8 words.
-  GOOD: "Germany invades Poland without warning"
-  BAD:  "The invasion of Poland"
-
-events.summary: One punchy sentence a 16-year-old 
-would understand. State what happened AND why it 
-mattered. Max 20 words.
-
-events.detail: Exactly 2-3 sentences.
-  Sentence 1 — what happened in plain language.
-  Sentence 2 — why it happened or who caused it.
-  Sentence 3 — what changed as a result.
-  Never start with the word "The".
-
-events.subEvents: Each subEvent is a distinct 
-moment that happened between this main event and 
-the next. Zoom IN — do not restate the parent.
-  subEvents.title: What happened in 5 words. 
-    Must contain a verb.
-  subEvents.desc: One sentence. Must include at 
-    least one specific name, number, or place.
-    GOOD: "Churchill orders RAF to defend London 
-      at all costs after Dunkirk evacuation"
-    BAD:  "Things escalated and got more serious"
-
-outro.summary: 2-3 sentences on legacy. Must 
-include one fact that would genuinely surprise 
-someone who just finished reading. No generalities 
-like "this changed the world" — be specific 
-and concrete.
-
-outro.question: One question with no easy answer. 
-Do NOT start with "What if". Do NOT ask about 
-the future. Ask about the nature of what just 
-happened. End with ... not a question mark.
-
-related: 3 topic names thematically connected 
-to this topic that would make great timelines.
-
-EXAMPLE OF ONE HIGH QUALITY EVENT — match this:
-{
-  "date": "Jun 1944",
-  "title": "Allied forces storm Normandy beaches",
-  "summary": "150,000 troops land on five French beaches, opening the front that will end Nazi occupation of Western Europe.",
-  "detail": "Operation Overlord was the largest seaborne invasion in history. Despite catastrophic losses at Omaha Beach where 2,000 Americans fell in hours, Allied forces secured a foothold by nightfall. It marked the beginning of the end for Hitler's empire in the West.",
-  "type": "war",
-  "subEvents": [
-    {
-      "date": "Jun 5, 1944",
-      "title": "Eisenhower gives the order",
-      "desc": "Despite poor weather, Eisenhower tells 150,000 troops they go tomorrow."
-    },
-    {
-      "date": "Jun 6, 1944",
-      "title": "Paratroopers drop behind enemy lines",
-      "desc": "13,000 American paratroopers land in darkness to cut off German reinforcements inland."
-    },
-    {
-      "date": "Jun 6, 1944",
-      "title": "Five beaches stormed at dawn",
-      "desc": "Allied divisions hit Utah, Omaha, Gold, Juno and Sword simultaneously at 06:30."
-    },
-    {
-      "date": "Jun 7, 1944",
-      "title": "Beachhead secured despite heavy losses",
-      "desc": "Over 10,000 Allied casualties recorded but all five beaches held by end of day one."
-    },
-    {
-      "date": "Jun 25, 1944",
-      "title": "Cherbourg falls to US forces",
-      "desc": "First major French port captured, giving Allies a critical supply route for troops inland."
-    }
-  ]
-}
-
-Now generate the full timeline. Return ONLY this 
-JSON structure. First character must be { and 
-last character must be } with nothing before 
-or after:
-
-{
-  "topic": "string",
-  "intro": "string",
-  "events": [
-    {
-      "date": "string",
-      "title": "string",
-      "summary": "string",
-      "detail": "string",
-      "type": "political|war|culture|science|economy|other",
-      "subEvents": [
-        {
-          "date": "string",
-          "title": "string",
-          "desc": "string"
-        }
-      ]
-    }
-  ],
-  "outro": {
-    "summary": "string",
-    "question": "string"
-  },
-  "related": ["string", "string", "string"],
-  "ongoing": false
-}
-
-OUTPUT RULES:
-- Exactly 10 main events in chronological order
-- Exactly 5 subEvents per main event
-- ongoing is true only if events are actively 
-  unfolding in 2025
-- Every string is valid JSON — no unescaped 
-  quotes, no line breaks inside strings
-- If unsure of exact date, use year only
-- First character: {
-- Last character: }
-- Nothing else`
+            content: `Generate a timeline for: ${topic}\nFIELD QUALITY GUIDE:\n- topic: clean display name\n- intro: 2-3 sentences. Hook the reader, give context, set up the tension. Write like a magazine opening paragraph.\n- events.title: active verb headline max 8 words. GOOD: "Germany invades Poland without warning" BAD: "The invasion of Poland"\n- events.summary: one punchy sentence a 16-year-old understands. State what happened AND why it mattered. Max 20 words.\n- events.detail: exactly 2-3 sentences. Sentence 1 what happened. Sentence 2 why it happened. Sentence 3 what changed. Never start with "The".\n- events.subEvents: exactly 5 per event. Each is a distinct moment zooming into that period. Title must have a verb. Desc must include a specific name, number, or place.\n- outro.summary: 2-3 sentences on legacy including one genuinely surprising specific fact. No generalities.\n- outro.question: one lingering question about the nature of what happened. Do not start with "What if". End with ... not a question mark.\n- related: 3 thematically connected topic names.\nEXAMPLE HIGH QUALITY EVENT:\n{"date":"Jun 1944","title":"Allied forces storm Normandy beaches","summary":"150,000 troops land on five French beaches, opening the front that ends Nazi occupation of Western Europe.","detail":"Operation Overlord was the largest seaborne invasion in history. Despite catastrophic losses at Omaha Beach where 2,000 Americans fell in hours, Allied forces secured a foothold by nightfall. It marked the beginning of the end for Hitler's empire in the West.","type":"war","subEvents":[{"date":"Jun 5, 1944","title":"Eisenhower gives the order","desc":"Despite poor weather, Eisenhower tells 150,000 troops they go tomorrow."},{"date":"Jun 6, 1944","title":"Paratroopers drop behind enemy lines","desc":"13,000 American paratroopers land in darkness to cut off German reinforcements inland."},{"date":"Jun 6, 1944","title":"Five beaches stormed at dawn","desc":"Allied divisions hit Utah, Omaha, Gold, Juno and Sword simultaneously at 06:30."},{"date":"Jun 7, 1944","title":"Beachhead secured despite heavy losses","desc":"Over 10,000 Allied casualties but all five beaches held by end of day one."},{"date":"Jun 25, 1944","title":"Cherbourg falls to US forces","desc":"First major French port captured giving Allies a critical supply route for troops inland."}]}\nReturn ONLY this JSON. First character { last character } nothing else:\n{"topic":"string","intro":"string","events":[{"date":"string","title":"string","summary":"string","detail":"string","type":"political|war|culture|science|economy|other","subEvents":[{"date":"string","title":"string","desc":"string"},{"date":"string","title":"string","desc":"string"},{"date":"string","title":"string","desc":"string"},{"date":"string","title":"string","desc":"string"},{"date":"string","title":"string","desc":"string"}]}],"outro":{"summary":"string","question":"string"},"related":["string","string","string"],"ongoing":false}\nOUTPUT RULES:\n- Exactly 10 main events chronological\n- Exactly 5 subEvents per main event\n- ongoing true only if actively unfolding in 2025\n- Every string valid JSON safe, no unescaped quotes, no line breaks inside strings\n- First character of response must be {\n- Last character must be }\n- Nothing before or after`
           }
         ]
       })
@@ -212,27 +69,45 @@ OUTPUT RULES:
     try {
       return JSON.parse(cleaned)
     } catch {
-      const lastBrace = cleaned.lastIndexOf('},')
-      if (lastBrace === -1) {
+      // Each event with subEvents ends with one of two patterns:
+      //   }]},  → lastSubEvent} subEvents] event} separator,
+      //   }]}]  → lastSubEvent} subEvents] event} eventsArray]  (last event)
+      // Find the rightmost valid cut-point and close the JSON from there.
+      const idxFinal = cleaned.lastIndexOf('}]}]')
+      const idxSep   = cleaned.lastIndexOf('}]},')
+
+      let partial
+
+      if (idxFinal !== -1 && idxFinal >= idxSep) {
+        // All events complete; truncation is in outro or later.
+        // Slice through the events-array closing ].
+        partial = cleaned.slice(0, idxFinal + 4)
+      } else if (idxSep !== -1) {
+        // At least one complete non-final event found.
+        // idxSep+2 is the event-closing }; append ] to close the events array.
+        partial = cleaned.slice(0, idxSep + 3) + ']'
+      } else {
         throw new Error(
           'Could not generate timeline. Please try again.'
         )
       }
-      let partial = cleaned.slice(0, lastBrace + 1) + ']}'
+
       if (!partial.includes('"outro"')) {
-        partial = partial.replace(
-          ']}',
-          `],"outro":{"summary":"","question":"..."},` +
-          `"related":[],"ongoing":false}}`
-        )
+        partial +=
+          ',"outro":{"summary":"","question":"..."}' +
+          ',"related":[],"ongoing":false}'
+      } else {
+        partial += '}'
       }
+
       if (!partial.includes('"intro"')) {
         const eventsIndex = partial.indexOf('"events"')
         if (eventsIndex !== -1) {
-          partial = `{"topic":"","intro":"",` +
+          partial = '{"topic":"","intro":"",' +
             partial.slice(eventsIndex)
         }
       }
+
       try {
         return JSON.parse(partial)
       } catch {
