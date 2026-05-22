@@ -52,43 +52,143 @@ any text outside the JSON object.`
             role: 'user',
             content: `Generate a timeline for: ${topic}
 
-Return ONLY this JSON structure, nothing else:
+Before writing, think about:
+- What is the single most important thread that 
+  runs through this topic's entire history?
+- Which 10 events best reveal that thread to 
+  someone who knows nothing about this topic?
+- What surprising or counterintuitive fact would 
+  make a reader stop and think?
+
+FIELD QUALITY GUIDE — read before writing:
+
+topic: Clean display name for the topic.
+
+intro: 2-3 sentences. Job 1 — hook the reader 
+with what makes this topic uniquely important or 
+surprising. Job 2 — give essential context a 
+newcomer needs. Job 3 — set up the tension the 
+timeline will answer. Write like the opening 
+paragraph of a long-form magazine article.
+
+events.title: Active verb headline max 8 words.
+  GOOD: "Germany invades Poland without warning"
+  BAD:  "The invasion of Poland"
+
+events.summary: One punchy sentence a 16-year-old 
+would understand. State what happened AND why it 
+mattered. Max 20 words.
+
+events.detail: Exactly 2-3 sentences.
+  Sentence 1 — what happened in plain language.
+  Sentence 2 — why it happened or who caused it.
+  Sentence 3 — what changed as a result.
+  Never start with the word "The".
+
+events.subEvents: Each subEvent is a distinct 
+moment that happened between this main event and 
+the next. Zoom IN — do not restate the parent.
+  subEvents.title: What happened in 5 words. 
+    Must contain a verb.
+  subEvents.desc: One sentence. Must include at 
+    least one specific name, number, or place.
+    GOOD: "Churchill orders RAF to defend London 
+      at all costs after Dunkirk evacuation"
+    BAD:  "Things escalated and got more serious"
+
+outro.summary: 2-3 sentences on legacy. Must 
+include one fact that would genuinely surprise 
+someone who just finished reading. No generalities 
+like "this changed the world" — be specific 
+and concrete.
+
+outro.question: One question with no easy answer. 
+Do NOT start with "What if". Do NOT ask about 
+the future. Ask about the nature of what just 
+happened. End with ... not a question mark.
+
+related: 3 topic names thematically connected 
+to this topic that would make great timelines.
+
+EXAMPLE OF ONE HIGH QUALITY EVENT — match this:
 {
-  "topic": "display name for the topic",
-  "intro": "2-3 sentence editorial introduction",
+  "date": "Jun 1944",
+  "title": "Allied forces storm Normandy beaches",
+  "summary": "150,000 troops land on five French beaches, opening the front that will end Nazi occupation of Western Europe.",
+  "detail": "Operation Overlord was the largest seaborne invasion in history. Despite catastrophic losses at Omaha Beach where 2,000 Americans fell in hours, Allied forces secured a foothold by nightfall. It marked the beginning of the end for Hitler's empire in the West.",
+  "type": "war",
+  "subEvents": [
+    {
+      "date": "Jun 5, 1944",
+      "title": "Eisenhower gives the order",
+      "desc": "Despite poor weather, Eisenhower tells 150,000 troops they go tomorrow."
+    },
+    {
+      "date": "Jun 6, 1944",
+      "title": "Paratroopers drop behind enemy lines",
+      "desc": "13,000 American paratroopers land in darkness to cut off German reinforcements inland."
+    },
+    {
+      "date": "Jun 6, 1944",
+      "title": "Five beaches stormed at dawn",
+      "desc": "Allied divisions hit Utah, Omaha, Gold, Juno and Sword simultaneously at 06:30."
+    },
+    {
+      "date": "Jun 7, 1944",
+      "title": "Beachhead secured despite heavy losses",
+      "desc": "Over 10,000 Allied casualties recorded but all five beaches held by end of day one."
+    },
+    {
+      "date": "Jun 25, 1944",
+      "title": "Cherbourg falls to US forces",
+      "desc": "First major French port captured, giving Allies a critical supply route for troops inland."
+    }
+  ]
+}
+
+Now generate the full timeline. Return ONLY this 
+JSON structure. First character must be { and 
+last character must be } with nothing before 
+or after:
+
+{
+  "topic": "string",
+  "intro": "string",
   "events": [
     {
-      "date": "Month Year or Year",
-      "title": "Short title max 8 words",
-      "summary": "One clear sentence max 20 words",
-      "detail": "2-3 sentences of deeper context",
+      "date": "string",
+      "title": "string",
+      "summary": "string",
+      "detail": "string",
       "type": "political|war|culture|science|economy|other",
       "subEvents": [
         {
-          "date": "Month Year or Year",
-          "title": "Short title max 6 words",
-          "desc": "One short sentence max 12 words"
+          "date": "string",
+          "title": "string",
+          "desc": "string"
         }
       ]
     }
   ],
   "outro": {
-    "summary": "2-3 sentences on lasting impact with surprising fact",
-    "question": "Thought provoking question ending with question mark"
+    "summary": "string",
+    "question": "string"
   },
-  "related": [],
+  "related": ["string", "string", "string"],
   "ongoing": false
 }
 
-Critical Rules:
-- Return exactly 10 events chronologically
-- Keep each field short and concise
-- For each main event generate 5 subEvents
-- SubEvents are in chronological order
-- ALL strings must be valid JSON
-- Set ongoing to true if topic is still unfolding
-- Return ONLY valid JSON nothing else
-- No markdown backticks or explanation`
+OUTPUT RULES:
+- Exactly 10 main events in chronological order
+- Exactly 5 subEvents per main event
+- ongoing is true only if events are actively 
+  unfolding in 2025
+- Every string is valid JSON — no unescaped 
+  quotes, no line breaks inside strings
+- If unsure of exact date, use year only
+- First character: {
+- Last character: }
+- Nothing else`
           }
         ]
       })
