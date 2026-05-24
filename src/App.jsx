@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Routes, Route, useNavigate, 
   useParams, Navigate } from 'react-router-dom'
 import styles from './App.module.css'
@@ -157,43 +157,299 @@ function ThemeToggle() {
   )
 }
 
+// ── Static homepage data (Supabase later) ───────────────────────
+const BREAKING = [
+  { slug: 'india-pakistan-ceasefire', title: 'India-Pakistan Ceasefire Negotiations', tier: 'breaking', update: 'Updated 2 hours ago · Day 4' },
+  { slug: 'gaza-ceasefire-talks', title: 'Gaza Ceasefire Talks', tier: 'developing', update: 'Updated yesterday · Week 3' },
+  { slug: 'uk-election-2025', title: 'UK General Election 2025', tier: 'recent', update: 'Updated 3 days ago' },
+  { slug: 'openai-gpt5-launch', title: 'OpenAI GPT-5 Launch Fallout', tier: 'developing', update: 'Updated 5 hours ago · Day 8' },
+]
+const FEATURED = [
+  { slug: 'nelson-mandela', title: 'Nelson Mandela', category: 'Personalities', description: 'From political prisoner to president — the most improbable journey in modern history.', events: 10, readTime: '8 min', coverFrom: '#1a0533', coverTo: '#3d1a6e', large: true },
+  { slug: 'world-war-ii', title: 'World War II', category: 'Events', events: 10, readTime: '9 min', coverFrom: '#0a1628', coverTo: '#1a3a5c', large: false },
+  { slug: 'history-of-ai', title: 'History of AI', category: 'Science', events: 10, readTime: '7 min', coverFrom: '#0a1a10', coverTo: '#1a4025', large: false },
+]
+const CATEGORIES = [
+  { slug: 'personalities', name: 'Personalities', icon: '👤', count: 14 },
+  { slug: 'events',        name: 'Events',        icon: '📅', count: 14 },
+  { slug: 'countries',     name: 'Countries',     icon: '🌍', count: 14 },
+  { slug: 'technology',    name: 'Technology',    icon: '💻', count: 14 },
+  { slug: 'science',       name: 'Science',       icon: '🔬', count: 14 },
+  { slug: 'geopolitics',   name: 'Geopolitics',   icon: '🗺️', count: 14 },
+  { slug: 'entertainment', name: 'Entertainment', icon: '🎬', count: 14 },
+]
+const RECENT = [
+  { slug: 'history-of-india',    title: 'History of India',      category: 'Countries',      events: 10, readTime: '8 min', coverFrom: '#1a1200', coverTo: '#4a3500' },
+  { slug: 'iphone',              title: 'The iPhone',            category: 'Technology',     events: 10, readTime: '7 min', coverFrom: '#0a0a1a', coverTo: '#1a2040' },
+  { slug: 'the-cold-war',        title: 'The Cold War',          category: 'Geopolitics',    events: 10, readTime: '9 min', coverFrom: '#0b132b', coverTo: '#1c2541' },
+  { slug: 'history-of-hollywood',title: 'History of Hollywood',  category: 'Entertainment',  events: 10, readTime: '8 min', coverFrom: '#1b1b1b', coverTo: '#4a2c2a' },
+]
+
+const TIER_LABEL = { breaking: 'Live', developing: 'Developing', recent: 'Recent' }
+
+function ComingSoon() {
+  const navigate = useNavigate()
+  return (
+    <div className={styles.app} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '1rem' }}>
+      <p style={{ fontSize: '2rem' }}>🚧</p>
+      <p style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)' }}>Coming soon</p>
+      <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>This page is under construction.</p>
+      <button onClick={() => navigate('/')} className={styles.themeToggle} style={{ marginTop: '0.5rem' }}>← Back home</button>
+    </div>
+  )
+}
+
 function HomeView() {
   const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [subscribed, setSubscribed] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
-  function handleSearch(topic) {
-    if (!topic.trim()) return
-    navigate(`/timeline/${toSlug(topic)}`)
+  useEffect(() => {
+    if (!dropdownOpen) return
+    function onOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
+        setDropdownOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [dropdownOpen])
+
+  function handleSubscribe(e) {
+    e.preventDefault()
+    setSubscribed(true)
   }
 
   return (
-    <div className={styles.app}>
-      <header className={styles.hero}>
-        <div className={styles.navRow}>
-          <div className={styles.logoWrap}>
-            <Logo size={34} />
-            <h1 className={styles.logo}>
-              <span className={styles.logoMain}>
-                Epochly
-              </span>
-              <span className={styles.logoAi}>
-                .ai
-              </span>
-            </h1>
+    <div className={styles.homePage}>
+
+      {/* ── NAV ── */}
+      <nav className={styles.homeNav}>
+        <div className={styles.homeNavInner}>
+          <div
+            className={styles.logoWrap}
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate('/')}
+          >
+            <Logo size={28} />
+            <span className={styles.homeLogoText}>
+              Epochly<span className={styles.homeLogoAi}>.ai</span>
+            </span>
           </div>
-          <ThemeToggle />
+          <div className={styles.homeNavRight}>
+            <button className={styles.homeNavBtn} onClick={() => navigate('/browse')}>Browse</button>
+            <button className={styles.homeNavBtn} onClick={() => navigate('/recent')}>Recent Events</button>
+            <ThemeToggle />
+            <div className={styles.avatarWrap} ref={dropdownRef}>
+              <button
+                className={styles.avatarBtn}
+                onClick={() => setDropdownOpen(o => !o)}
+                aria-label="Account"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+              </button>
+              {dropdownOpen && (
+                <div className={styles.avatarDropdown}>
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => { navigate('/signin'); setDropdownOpen(false) }}
+                  >
+                    Sign in
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <p className={styles.tagline}>
-          Type any topic. See its story unfold.
-        </p>
-        <SearchBar onSearch={handleSearch} />
-        <TopicPills
-          topics={PRESET_TOPICS}
-          onSelect={handleSearch}
-        />
-      </header>
-      <main className={styles.main}>
-        <EmptyState />
-      </main>
+      </nav>
+
+      <div className={styles.homeContent}>
+
+        {/* ── BREAKING STRIP ── */}
+        <section className={styles.homeSection}>
+          <div className={styles.secHead}>
+            <svg className={styles.secIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            <span className={styles.secTitle}>Live &amp; developing</span>
+            <div className={styles.secLine} />
+            <button className={styles.secLink} onClick={() => navigate('/recent')}>See all →</button>
+          </div>
+          <div className={styles.breakingRow}>
+            {BREAKING.map(item => (
+              <div
+                key={item.slug}
+                className={`${styles.breakingCard} ${item.tier === 'breaking' ? styles.breakingCardLive : ''}`}
+                onClick={() => navigate(`/timeline/${item.slug}`)}
+              >
+                <div className={`${styles.tierBadge} ${styles['tier_' + item.tier]}`}>
+                  <span className={`${styles.tierDot} ${styles['tierDot_' + item.tier]}`} />
+                  {TIER_LABEL[item.tier]}
+                </div>
+                <p className={styles.breakingTitle}>{item.title}</p>
+                <p className={styles.breakingUpdate}>{item.update}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── EDITOR'S PICKS ── */}
+        <section className={styles.homeSection}>
+          <div className={styles.secHead}>
+            <svg className={styles.secIcon} width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.9 6.3 6.8.9-5 4.7 1.2 6.8L12 17.7l-5.9 3 1.2-6.8L2.3 9.2l6.8-.9L12 2z" />
+            </svg>
+            <span className={styles.secTitle}>Editor&apos;s picks</span>
+            <div className={styles.secLine} />
+            <span className={styles.secSub}>Featured this week</span>
+          </div>
+          <div className={styles.featuredGrid}>
+            {FEATURED.filter(f => f.large).map(item => (
+              <div
+                key={item.slug}
+                className={styles.featuredLarge}
+                onClick={() => navigate(`/timeline/${item.slug}`)}
+              >
+                <div
+                  className={styles.featuredLargeCover}
+                  style={{ background: `linear-gradient(135deg,${item.coverFrom},${item.coverTo})` }}
+                >
+                  <span className={styles.coverPill}>{item.category}</span>
+                </div>
+                <div className={styles.featuredLargeBody}>
+                  <p className={styles.featuredTitle}>{item.title}</p>
+                  <p className={styles.featuredDesc}>{item.description}</p>
+                  <p className={styles.featuredMeta}>{item.events} events · {item.readTime}</p>
+                </div>
+              </div>
+            ))}
+            <div className={styles.featuredSmallRow}>
+              {FEATURED.filter(f => !f.large).map(item => (
+                <div
+                  key={item.slug}
+                  className={styles.featuredSmall}
+                  onClick={() => navigate(`/timeline/${item.slug}`)}
+                >
+                  <div
+                    className={styles.featuredSmallCover}
+                    style={{ background: `linear-gradient(135deg,${item.coverFrom},${item.coverTo})` }}
+                  >
+                    <span className={styles.coverPill}>{item.category}</span>
+                  </div>
+                  <div className={styles.featuredSmallBody}>
+                    <p className={styles.featuredTitle}>{item.title}</p>
+                    <p className={styles.featuredMeta}>{item.events} events · {item.readTime}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── BROWSE BY CATEGORY ── */}
+        <section className={styles.homeSection}>
+          <div className={styles.secHead}>
+            <svg className={styles.secIcon} width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+              <rect x="0" y="0" width="6" height="6" rx="1" />
+              <rect x="8" y="0" width="6" height="6" rx="1" />
+              <rect x="0" y="8" width="6" height="6" rx="1" />
+              <rect x="8" y="8" width="6" height="6" rx="1" />
+            </svg>
+            <span className={styles.secTitle}>Browse by category</span>
+            <div className={styles.secLine} />
+          </div>
+          <div className={styles.categoriesRow}>
+            {CATEGORIES.map(cat => (
+              <div
+                key={cat.slug}
+                className={styles.categoryCard}
+                onClick={() => navigate(`/category/${cat.slug}`)}
+              >
+                <span className={styles.categoryIcon}>{cat.icon}</span>
+                <span className={styles.categoryName}>{cat.name}</span>
+                <span className={styles.categoryCount}>{cat.count} topics</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── RECENTLY ADDED ── */}
+        <section className={styles.homeSection}>
+          <div className={styles.secHead}>
+            <svg className={styles.secIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span className={styles.secTitle}>Recently added</span>
+            <div className={styles.secLine} />
+            <button className={styles.secLink} onClick={() => navigate('/recent')}>View all →</button>
+          </div>
+          <div className={styles.recentList}>
+            {RECENT.map(item => (
+              <div
+                key={item.slug}
+                className={styles.recentCard}
+                onClick={() => navigate(`/timeline/${item.slug}`)}
+              >
+                <div
+                  className={styles.recentCover}
+                  style={{ background: `linear-gradient(135deg,${item.coverFrom},${item.coverTo})` }}
+                />
+                <div className={styles.recentInfo}>
+                  <span className={styles.recentCategory}>{item.category}</span>
+                  <span className={styles.recentTitle}>{item.title}</span>
+                  <span className={styles.recentMeta}>{item.events} events · {item.readTime}</span>
+                </div>
+                <span className={styles.recentChevron}>›</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── NEWSLETTER ── */}
+        <section className={styles.newsletterSection}>
+          <div className={styles.newsletterRow}>
+            <div className={styles.newsletterLeft}>
+              <p className={styles.newsletterTitle}>Weekly digest</p>
+              <p className={styles.newsletterSub}>New timelines every week. No spam.</p>
+            </div>
+            <div className={styles.newsletterRight}>
+              {subscribed ? (
+                <p className={styles.newsletterThanks}>Thanks — you&apos;re in!</p>
+              ) : (
+                <form className={styles.newsletterForm} onSubmit={handleSubscribe}>
+                  <input
+                    className={styles.newsletterInput}
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                  />
+                  <button className={styles.newsletterBtn} type="submit">Subscribe</button>
+                </form>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ── FOOTER ── */}
+        <footer className={styles.homeFooter}>
+          <span className={styles.footerLeft}>
+            Epochly.ai — explore history one timeline at a time
+          </span>
+          <div className={styles.footerRight}>
+            <button className={styles.footerLink} onClick={() => navigate('/about')}>About</button>
+            <button className={styles.footerLink} onClick={() => navigate('/privacy')}>Privacy</button>
+            <button className={styles.footerLink} onClick={() => navigate('/affiliate')}>Affiliate disclosure</button>
+          </div>
+        </footer>
+
+      </div>
     </div>
   )
 }
@@ -282,15 +538,17 @@ function TimelineView() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomeView />} />
-      <Route
-        path="/timeline/:slug"
-        element={<TimelineView />}
-      />
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
+      <Route path="/"                element={<HomeView />} />
+      <Route path="/timeline/:slug"  element={<TimelineView />} />
+      <Route path="/browse"          element={<ComingSoon />} />
+      <Route path="/recent"          element={<ComingSoon />} />
+      <Route path="/signin"          element={<ComingSoon />} />
+      <Route path="/category/:slug"  element={<ComingSoon />} />
+      <Route path="/profile"         element={<ComingSoon />} />
+      <Route path="/about"           element={<ComingSoon />} />
+      <Route path="/privacy"         element={<ComingSoon />} />
+      <Route path="/affiliate"       element={<ComingSoon />} />
+      <Route path="*"                element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
