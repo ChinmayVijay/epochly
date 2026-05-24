@@ -486,11 +486,6 @@ function TimelineView() {
       })
   }, [slug])
 
-  function handleSearch(newTopic) {
-    if (!newTopic.trim()) return
-    navigate(`/timeline/${toSlug(newTopic)}`)
-  }
-
   return (
     <div className={styles.app}>
       <header className={styles.hero}>
@@ -512,7 +507,6 @@ function TimelineView() {
           </div>
           <ThemeToggle />
         </div>
-        <SearchBar onSearch={handleSearch} />
       </header>
       <main className={styles.main}>
         {status === 'loading' && (
